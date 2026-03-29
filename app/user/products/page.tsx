@@ -111,7 +111,8 @@ export default function ProductsPage() {
   };
 
   return (
-    <main className="min-h-screen text-white px-4 py-8 bg-[#080d18]">
+    <main className="relative min-h-screen text-white px-4 py-8 bg-[#080d18] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-950/30 to-transparent pointer-events-none" />
 
       {/* Toast */}
       {toast && (

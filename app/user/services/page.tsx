@@ -76,7 +76,8 @@ export default function ServicesPage() {
   };
 
   return (
-    <div className="p-6 min-h-screen text-white bg-[#080d18]">
+    <div className="relative p-6 min-h-screen text-white bg-[#080d18] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-950/30 to-transparent pointer-events-none" />
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <h1 className="text-2xl font-bold">Nos services</h1>

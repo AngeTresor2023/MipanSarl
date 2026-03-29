@@ -199,7 +199,8 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white px-4 py-8">
+    <main className="relative min-h-screen bg-[#080d18] text-white px-4 py-8 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-950/30 to-transparent pointer-events-none" />
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* En-tête */}

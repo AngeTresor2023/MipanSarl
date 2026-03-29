@@ -107,7 +107,7 @@ export default function ProductCard({
     `}>
 
       {/* IMAGE */}
-      <div className="relative w-full h-44 rounded-t-xl overflow-hidden bg-[#1e1e1e] flex items-center justify-center flex-shrink-0">
+      <div className="relative w-full h-44 rounded-t-xl overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0">
         <StockBadge available={product.available} quantity={product.quantity} />
 
         {loadingImage ? (

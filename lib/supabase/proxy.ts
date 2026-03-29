@@ -62,23 +62,14 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
-  // ── Session active — déterminer le rôle ──────────────────────────────────
-  const cachedRole = request.cookies.get(COOKIE_NAME)?.value;
-  let role: string;
+  // ── Session active — toujours lire le rôle depuis la base ──────────────────
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  if (cachedRole) {
-    // Rôle déjà en cache (cookie)
-    role = cachedRole;
-  } else {
-    // Première visite après connexion : lire le rôle en base
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    role = (profile?.role as string) ?? "user";
-  }
+  const role = (profile?.role as string) ?? "user";
 
   const isAdmin = role === "admin";
 

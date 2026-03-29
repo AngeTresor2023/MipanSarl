@@ -70,8 +70,52 @@ export default async function RootLayout({
   const isAdmin = role === "admin";
   const hasUser = role !== null;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "MIPAN SARL",
+    "description": "Spécialiste du transport et de la logistique internationale depuis Douala, Cameroun. Expédition de colis, barils, véhicules et marchandises.",
+    "url": defaultUrl,
+    "logo": `${defaultUrl}/og-image.png`,
+    "image": `${defaultUrl}/og-image.png`,
+    "email": "support@mipansarl.com",
+    "telephone": "+237600000000",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Douala",
+      "addressCountry": "CM"
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "08:00",
+        "closes": "18:00"
+      }
+    ],
+    "sameAs": [],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Services de transport et logistique",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Transport de colis" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Expédition de barils" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Transport de véhicules" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fret aérien" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fret maritime" } }
+      ]
+    }
+  };
+
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <meta name="google-site-verification" content="beXNj5IECI2vivz565Njy56w9qhoKEBNn2CmyHkFn18" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${geistSans.className} antialiased text-white`}>
         <ThemeProvider
           attribute="class"

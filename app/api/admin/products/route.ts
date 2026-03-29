@@ -42,6 +42,16 @@ export async function GET() {
   return NextResponse.json({ products });
 }
 
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    + "-" + Date.now();
+}
+
 // POST — créer un produit
 export async function POST(req: Request) {
   const { supabase, error } = await requireAdmin();
@@ -59,6 +69,7 @@ export async function POST(req: Request) {
     .from("products")
     .insert([{
       title: String(title).trim(),
+      slug: generateSlug(String(title).trim()),
       price: Number(price),
       quantity: qty,
       category: category || null,

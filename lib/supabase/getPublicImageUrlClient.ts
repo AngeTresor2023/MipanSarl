@@ -31,7 +31,7 @@ export async function getPublicImageUrlClient(productId: string): Promise<string
 
     // Sinon si storage_path est présent, construire l'URL publique via Supabase Storage
     if (data?.storage_path) {
-      const { data: urlData } = supabase.storage.from("produits").getPublicUrl(data.storage_path);
+      const { data: urlData } = supabase.storage.from("Products").getPublicUrl(data.storage_path);
       return urlData?.publicUrl ?? null;
     }
 

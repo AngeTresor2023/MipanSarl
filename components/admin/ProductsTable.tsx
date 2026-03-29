@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/input";
 
@@ -12,6 +13,7 @@ type Product = {
   category?: string | null;
   description?: string | null;
   available: boolean;
+  image_url?: string | null;
 };
 
 type ProductForm = {
@@ -31,15 +33,85 @@ const apiCall = (method: string, body: Record<string, unknown>) =>
     body: JSON.stringify(body),
   }).then((r) => r.json());
 
+const uploadImage = async (productId: string, file: File): Promise<void> => {
+  const fd = new FormData();
+  fd.append("product_id", productId);
+  fd.append("file", file);
+  const res = await fetch("/api/admin/products/image", { method: "POST", body: fd });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error ?? "Erreur upload image");
+  }
+};
+
+function ImagePicker({
+  file,
+  currentUrl,
+  onChange,
+  label,
+}: {
+  file: File | null;
+  currentUrl?: string | null;
+  onChange: (f: File | null) => void;
+  label: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const preview = file ? URL.createObjectURL(file) : currentUrl ?? null;
+
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        onClick={() => inputRef.current?.click()}
+        className="w-16 h-16 rounded-lg border border-white/15 bg-white/5 flex items-center justify-center cursor-pointer hover:border-cyan-500/50 transition overflow-hidden flex-shrink-0"
+      >
+        {preview ? (
+          <Image src={preview} alt="aperçu" width={64} height={64} className="object-cover w-full h-full" unoptimized />
+        ) : (
+          <span className="text-white/30 text-xs text-center leading-tight px-1">Photo</span>
+        )}
+      </div>
+      <div className="flex flex-col gap-1">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="px-3 py-1.5 rounded text-xs bg-white/8 border border-white/12 text-white/80 hover:bg-white/12 transition"
+        >
+          {label}
+        </button>
+        {(file || currentUrl) && (
+          <button
+            type="button"
+            onClick={() => { onChange(null); if (inputRef.current) inputRef.current.value = ""; }}
+            className="px-3 py-1.5 rounded text-xs bg-red-600/20 border border-red-500/20 text-red-300 hover:bg-red-600/30 transition"
+          >
+            Retirer
+          </button>
+        )}
+        {file && <span className="text-white/40 text-xs truncate max-w-[140px]">{file.name}</span>}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+      />
+    </div>
+  );
+}
+
 export default function ProductsTable({ compact }: { compact?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<ProductForm>(EMPTY);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<ProductForm>(EMPTY);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editCurrentUrl, setEditCurrentUrl] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -73,6 +145,8 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
   const openEdit = (p: Product) => {
     setEditingId(p.id);
     setEditForm({ title: p.title, price: String(p.price), quantity: String(p.quantity), category: p.category ?? "", description: p.description ?? "" });
+    setEditImageFile(null);
+    setEditCurrentUrl(p.image_url ?? null);
     setMsg(null);
     setShowForm(false);
   };
@@ -95,9 +169,19 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
       category: form.category.trim() || null,
       description: form.description.trim() || null,
     });
+    if (json.error) { setSaving(false); setMsg("Erreur : " + json.error); return; }
+    if (imageFile && json.product?.id) {
+      try {
+        await uploadImage(json.product.id, imageFile);
+      } catch (e) {
+        setMsg("Produit créé mais erreur image : " + (e as Error).message);
+        setSaving(false);
+        await load();
+        return;
+      }
+    }
     setSaving(false);
-    if (json.error) { setMsg("Erreur : " + json.error); return; }
-    setForm(EMPTY); setShowForm(false);
+    setForm(EMPTY); setImageFile(null); setShowForm(false);
     await load();
   };
 
@@ -114,9 +198,19 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
       category: editForm.category.trim() || null,
       description: editForm.description.trim() || null,
     });
+    if (json.error) { setSaving(false); setMsg("Erreur : " + json.error); return; }
+    if (editImageFile) {
+      try {
+        await uploadImage(editingId, editImageFile);
+      } catch (e) {
+        setMsg("Produit modifié mais erreur image : " + (e as Error).message);
+        setSaving(false);
+        await load();
+        return;
+      }
+    }
     setSaving(false);
-    if (json.error) { setMsg("Erreur : " + json.error); return; }
-    setEditingId(null); setEditForm(EMPTY);
+    setEditingId(null); setEditForm(EMPTY); setEditImageFile(null); setEditCurrentUrl(null);
     await load();
   };
 
@@ -145,9 +239,10 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
             <Input placeholder="Catégorie" value={form.category} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(setF(form, "category", e.target.value))} />
           </div>
           <Input placeholder="Description" value={form.description} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(setF(form, "description", e.target.value))} />
+          <ImagePicker file={imageFile} onChange={setImageFile} label="Choisir une image" />
           <div className="flex gap-2">
             <Button onClick={handleAdd} isLoading={saving} className="bg-cyan-600 hover:bg-cyan-500">Créer</Button>
-            <Button variant="outline" onClick={() => { setShowForm(false); setForm(EMPTY); setMsg(null); }}>Annuler</Button>
+            <Button variant="outline" onClick={() => { setShowForm(false); setForm(EMPTY); setImageFile(null); setMsg(null); }}>Annuler</Button>
           </div>
         </div>
       )}
@@ -163,9 +258,10 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
             <Input placeholder="Catégorie" value={editForm.category} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(setF(editForm, "category", e.target.value))} />
           </div>
           <Input placeholder="Description" value={editForm.description} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(setF(editForm, "description", e.target.value))} />
+          <ImagePicker file={editImageFile} currentUrl={editCurrentUrl} onChange={setEditImageFile} label={editCurrentUrl ? "Changer l'image" : "Ajouter une image"} />
           <div className="flex gap-2">
             <Button onClick={handleEditSave} isLoading={saving} className="bg-amber-600 hover:bg-amber-500">Enregistrer</Button>
-            <Button variant="outline" onClick={() => { setEditingId(null); setEditForm(EMPTY); setMsg(null); }}>Annuler</Button>
+            <Button variant="outline" onClick={() => { setEditingId(null); setEditForm(EMPTY); setEditImageFile(null); setEditCurrentUrl(null); setMsg(null); }}>Annuler</Button>
           </div>
         </div>
       )}
@@ -174,6 +270,7 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-white/50 border-b border-white/6">
+              <th className="p-3">Image</th>
               <th className="p-3">Produit</th>
               {!compact && <th className="p-3">Catégorie</th>}
               <th className="p-3">Prix</th>
@@ -184,9 +281,18 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
           </thead>
           <tbody>
             {products.length === 0 ? (
-              <tr><td colSpan={6} className="p-4 text-center text-white/40">Aucun produit.</td></tr>
+              <tr><td colSpan={7} className="p-4 text-center text-white/40">Aucun produit.</td></tr>
             ) : products.map((p) => (
               <tr key={p.id} className="border-t border-white/6 hover:bg-white/3 transition">
+                <td className="p-3">
+                  <div className="w-10 h-10 rounded overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    {p.image_url ? (
+                      <Image src={p.image_url} alt={p.title} width={40} height={40} className="object-cover w-full h-full" unoptimized />
+                    ) : (
+                      <span className="text-white/20 text-[10px]">—</span>
+                    )}
+                  </div>
+                </td>
                 <td className="p-3 font-medium">{p.title}</td>
                 {!compact && <td className="p-3 text-white/60">{p.category ?? "—"}</td>}
                 <td className="p-3 text-cyan-300">{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Number(p.price))} FCFA</td>

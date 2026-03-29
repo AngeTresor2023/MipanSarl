@@ -25,7 +25,7 @@ export async function getPublicImageUrlServer(productId: string): Promise<string
     if (data?.public_url) return data.public_url;
 
     if (data?.storage_path) {
-      const { data: urlData } = await supabase.storage.from("produits").getPublicUrl(data.storage_path);
+      const { data: urlData } = await supabase.storage.from("Products").getPublicUrl(data.storage_path);
       return urlData?.publicUrl ?? null;
     }
 

@@ -26,7 +26,7 @@ export async function GET() {
 
   const { data, error: err } = await supabase!
     .from("products")
-    .select("id, title, price, quantity, category, description, available, created_at, product_images(public_url, is_primary)")
+    .select("id, title, price, quantity, category, description, available, unit, created_at, product_images(public_url, is_primary)")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   if (error) return error;
 
   const body = await req.json();
-  const { title, price, quantity, category, description } = body;
+  const { title, price, quantity, category, description, unit } = body;
 
   if (!title || price === undefined || quantity === undefined) {
     return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
@@ -75,6 +75,7 @@ export async function POST(req: Request) {
       category: category || null,
       description: description || null,
       available: qty > 0,
+      unit: unit || "pièce",
     }])
     .select()
     .single();
@@ -89,7 +90,7 @@ export async function PATCH(req: Request) {
   if (error) return error;
 
   const body = await req.json();
-  const { id, title, price, quantity, category, description } = body;
+  const { id, title, price, quantity, category, description, unit } = body;
 
   if (!id) return NextResponse.json({ error: "id requis" }, { status: 400 });
 
@@ -103,6 +104,7 @@ export async function PATCH(req: Request) {
       category: category || null,
       description: description || null,
       available: qty > 0,
+      unit: unit || "pièce",
     })
     .eq("id", id);
 

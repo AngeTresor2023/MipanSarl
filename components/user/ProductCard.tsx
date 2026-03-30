@@ -14,6 +14,7 @@ type Product = {
   quantity?: number;
   available?: boolean;
   image_url?: string | null;
+  unit?: string | null;
 };
 
 const imageUrlCache = new Map<string, string | null>();
@@ -150,10 +151,15 @@ export default function ProductCard({
 
         {/* Prix + Bouton */}
         <div className="flex items-center justify-between gap-2 pt-2 mt-auto border-t border-white/6">
-          <span className="text-[18px] font-bold text-white leading-none">
-            {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Number(product.price))}
-            <span className="text-xs font-normal text-white/50 ml-1">FCFA</span>
-          </span>
+          <div className="flex flex-col leading-none">
+            <span className="text-[18px] font-bold text-white">
+              {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Number(product.price))}
+              <span className="text-xs font-normal text-white/50 ml-1">FCFA</span>
+            </span>
+            {product.unit && (
+              <span className="text-[11px] text-cyan-400/80 mt-0.5">/ {product.unit}</span>
+            )}
+          </div>
 
           <button
             onClick={handleAdd}

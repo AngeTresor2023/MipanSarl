@@ -15,7 +15,7 @@ type ProductImage = { storage_path?: string; public_url?: string; is_primary?: b
 type ProductRow = {
   id: string; title: string; description?: string; price: number;
   category?: string; quantity?: number; available?: boolean;
-  product_images?: ProductImage[]; image_url?: string | null;
+  product_images?: ProductImage[]; image_url?: string | null; unit?: string | null;
 };
 type CartItem = { id: string; title: string; price: number; qty: number; image_url: string | null };
 
@@ -199,7 +199,7 @@ export default function ProductsPage() {
               {visible.map((p) => (
                 <ProductCard
                   key={p.id}
-                  product={{ id: p.id, title: p.title, description: p.description, price: Number(p.price), category: p.category, quantity: p.quantity, available: p.available, image_url: p.image_url ?? null }}
+                  product={{ id: p.id, title: p.title, description: p.description, price: Number(p.price), category: p.category, quantity: p.quantity, available: p.available, image_url: p.image_url ?? null, unit: p.unit ?? null }}
                   onAdd={(prod) => addToCart(prod as ProductRow)}
                 />
               ))}

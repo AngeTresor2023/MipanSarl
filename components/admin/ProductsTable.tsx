@@ -5,6 +5,8 @@ import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/input";
 
+const UNITS = ["pièce", "carton", "kg", "litre", "lot", "boîte", "sac", "palette"];
+
 type Product = {
   id: string;
   title: string;
@@ -14,6 +16,7 @@ type Product = {
   description?: string | null;
   available: boolean;
   image_url?: string | null;
+  unit?: string | null;
 };
 
 type ProductForm = {
@@ -22,9 +25,10 @@ type ProductForm = {
   quantity: string;
   category: string;
   description: string;
+  unit: string;
 };
 
-const EMPTY: ProductForm = { title: "", price: "", quantity: "", category: "", description: "" };
+const EMPTY: ProductForm = { title: "", price: "", quantity: "", category: "", description: "", unit: "pièce" };
 
 const apiCall = (method: string, body: Record<string, unknown>) =>
   fetch("/api/admin/products", {
@@ -144,7 +148,7 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
 
   const openEdit = (p: Product) => {
     setEditingId(p.id);
-    setEditForm({ title: p.title, price: String(p.price), quantity: String(p.quantity), category: p.category ?? "", description: p.description ?? "" });
+    setEditForm({ title: p.title, price: String(p.price), quantity: String(p.quantity), category: p.category ?? "", description: p.description ?? "", unit: p.unit ?? "pièce" });
     setEditImageFile(null);
     setEditCurrentUrl(p.image_url ?? null);
     setMsg(null);
@@ -168,6 +172,7 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
       quantity: parseInt(form.quantity || "0"),
       category: form.category.trim() || null,
       description: form.description.trim() || null,
+      unit: form.unit || "pièce",
     });
     if (json.error) { setSaving(false); setMsg("Erreur : " + json.error); return; }
     if (imageFile && json.product?.id) {
@@ -197,6 +202,7 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
       quantity: parseInt(editForm.quantity || "0"),
       category: editForm.category.trim() || null,
       description: editForm.description.trim() || null,
+      unit: editForm.unit || "pièce",
     });
     if (json.error) { setSaving(false); setMsg("Erreur : " + json.error); return; }
     if (editImageFile) {
@@ -237,6 +243,16 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
             <Input placeholder="Prix (FCFA) *" value={form.price} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(setF(form, "price", e.target.value))} />
             <Input placeholder="Quantité" value={form.quantity} type="number" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(setF(form, "quantity", e.target.value))} />
             <Input placeholder="Catégorie" value={form.category} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(setF(form, "category", e.target.value))} />
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-white/50 mb-1">Unité de vente</label>
+              <select
+                value={form.unit}
+                onChange={(e) => setForm(setF(form, "unit", e.target.value))}
+                className="w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition"
+              >
+                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
           </div>
           <Input placeholder="Description" value={form.description} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(setF(form, "description", e.target.value))} />
           <ImagePicker file={imageFile} onChange={setImageFile} label="Choisir une image" />
@@ -256,6 +272,16 @@ export default function ProductsTable({ compact }: { compact?: boolean }) {
             <Input placeholder="Prix (FCFA) *" value={editForm.price} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(setF(editForm, "price", e.target.value))} />
             <Input placeholder="Quantité" value={editForm.quantity} type="number" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(setF(editForm, "quantity", e.target.value))} />
             <Input placeholder="Catégorie" value={editForm.category} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(setF(editForm, "category", e.target.value))} />
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-white/50 mb-1">Unité de vente</label>
+              <select
+                value={editForm.unit}
+                onChange={(e) => setEditForm(setF(editForm, "unit", e.target.value))}
+                className="w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition"
+              >
+                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
           </div>
           <Input placeholder="Description" value={editForm.description} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(setF(editForm, "description", e.target.value))} />
           <ImagePicker file={editImageFile} currentUrl={editCurrentUrl} onChange={setEditImageFile} label={editCurrentUrl ? "Changer l'image" : "Ajouter une image"} />

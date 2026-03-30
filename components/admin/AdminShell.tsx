@@ -4,13 +4,14 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, Grid, Package, ShoppingCart, Users, FileText, Wrench, ArrowLeftRight } from "lucide-react";
+import { LogOut, Grid, Package, ShoppingCart, Users, FileText, Wrench, ArrowLeftRight, BarChart2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
   { href: "/admin",           label: "Vue d'ensemble", icon: Grid },
   { href: "/admin/users",     label: "Utilisateurs",   icon: Users },
   { href: "/admin/products",  label: "Produits",       icon: Package },
+  { href: "/admin/stock",     label: "Stocks",         icon: BarChart2 },
   { href: "/admin/orders",    label: "Commandes",      icon: ShoppingCart },
   { href: "/admin/requests",  label: "Devis",          icon: FileText },
   { href: "/admin/services",  label: "Services",       icon: Wrench },

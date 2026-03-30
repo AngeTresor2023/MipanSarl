@@ -52,6 +52,10 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: { canonical: defaultUrl },
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 const geistSans = Geist({

@@ -11,18 +11,19 @@ export const metadata = {
 };
 
 const TIMELINE = [
-  { year: "2012", title: "Fondation", desc: "MIPAN SARL est créée à Douala par une équipe d'experts en logistique avec une vision claire : simplifier le commerce africain." },
-  { year: "2015", title: "Expansion régionale", desc: "Ouverture de partenariats dans 5 pays d'Afrique centrale. Lancement du service de fret LTL pour les PME." },
-  { year: "2018", title: "Customs Brokerage", desc: "Obtention de l'agrément douanier et lancement du service de dédouanement professionnel import/export." },
-  { year: "2021", title: "Digitalisation", desc: "Mise en place d'une plateforme de suivi en temps réel et d'un système de gestion des commandes en ligne." },
-  { year: "2024", title: "Aujourd'hui", desc: "Plus de 500 clients actifs, 15 pays desservis et une équipe de 30 professionnels dévoués à votre satisfaction." },
+  { year: "2018", title: "Fondation", desc: "MIPAN SARL est fondée avec une vision claire : connecter le Cameroun au monde. Première implantation à Douala pour le fret et la logistique." },
+  { year: "2020", title: "Ouverture Bafoussam", desc: "Extension des opérations à Bafoussam (ancien Tchamassi Night Club). Développement du réseau dans l'Ouest du Cameroun." },
+  { year: "2022", title: "Expansion internationale", desc: "Lancement des corridors Canada et Belgique (Bruxelles). Service 7j/7 24h/24 pour les clients de la diaspora." },
+  { year: "2024", title: "Digitalisation", desc: "Mise en place d'une plateforme de suivi en temps réel, gestion des commandes en ligne et service d'échange de devises EUR ↔ XOF." },
+  { year: "2026", title: "Aujourd'hui", desc: "Présents au Cameroun (Douala & Bafoussam), au Canada et en Belgique. Plus de 500 clients actifs desservis sur 3 pays." },
 ];
 
 const TEAM = [
-  { initials: "AD", name: "Ange Djomo", role: "Directeur Général", color: "bg-blue-600/30 text-blue-300", desc: "Expert en logistique internationale avec 15 ans d'expérience en Afrique subsaharienne." },
-  { initials: "HP", name: "Herman Pradel", role: "Directeur des Opérations", color: "bg-cyan-600/30 text-cyan-300", desc: "Spécialiste du fret et des opérations douanières. Coordinateur des partenaires régionaux." },
-  { initials: "MF", name: "Marie Fouda", role: "Responsable Commerce", color: "bg-purple-600/30 text-purple-300", desc: "En charge du développement commercial et de la relation client, 10 ans d'expérience." },
-  { initials: "PK", name: "Pierre Kamga", role: "Responsable Douanes", color: "bg-emerald-600/30 text-emerald-300", desc: "Commissionnaire en douane agréé. Expert en réglementation import/export camerounaise." },
+  { initials: "HP", name: "Herman Pradel", role: "Directeur Général & Directeur des Opérations Belgique", color: "bg-blue-600/30 text-blue-300", desc: "Directeur général de MIPAN SARL. Supervise les opérations en Belgique (Bruxelles) et coordonne la stratégie internationale." },
+  { initials: "TP", name: "Tchuendem Philomène", role: "Directrice des Opérations Cameroun (Douala)", color: "bg-cyan-600/30 text-cyan-300", desc: "Responsable de toutes les opérations logistiques depuis Douala. Coordinatrice du réseau camerounais." },
+  { initials: "DM", name: "Djeowou Michel", role: "Directeur des Opérations Bafoussam", color: "bg-purple-600/30 text-purple-300", desc: "Dirige le bureau de Bafoussam (ancien Tchamassi Night Club). Expert en logistique régionale Ouest-Cameroun." },
+  { initials: "AK", name: "Anita Kelly", role: "Directrice Service Client", color: "bg-emerald-600/30 text-emerald-300", desc: "Garantit l'excellence de la relation client. Point de contact privilégié pour la diaspora canadienne et belge." },
+  { initials: "AT", name: "Ange Trésor", role: "Directeur Technique", color: "bg-amber-600/30 text-amber-300", desc: "Responsable de l'infrastructure digitale, de la plateforme en ligne et des systèmes de suivi des envois." },
 ];
 
 const SERVICES_DETAIL = [
@@ -31,7 +32,7 @@ const SERVICES_DETAIL = [
   { icon: <Package size={20} />, title: "Messagerie Express", color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20",
     points: ["Collecte porte-à-porte", "Suivi GPS en temps réel", "Livraison sous 24 h (local)", "Preuve de livraison digitale"] },
   { icon: <Truck size={20} />, title: "Fret LTL", color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20",
-    points: ["Consolidation des cargaisons", "Tarif au volume réel", "Réseau de 15 pays africains", "Assurance marchandise incluse"] },
+    points: ["Consolidation des cargaisons", "Tarif au volume réel", "Réseau Cameroun · Canada · Belgique", "Assurance marchandise incluse"] },
   { icon: <Globe size={20} />, title: "Import / Export", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20",
     points: ["Sourcing de produits internationaux", "Négociation avec fournisseurs", "Gestion de la chaîne d'approvisionnement", "Accompagnement administratif complet"] },
 ];
@@ -57,7 +58,7 @@ export default function AboutPage() {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
         <div className="relative max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600/15 border border-blue-500/25 text-blue-300 text-xs font-medium mb-6">
-            <MapPin size={12} /> Douala, Cameroun — Fondée en 2012
+            <MapPin size={12} /> Douala · Bafoussam · Bruxelles — Fondée en 2018
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-5 leading-tight">
             À propos de
@@ -66,7 +67,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-white/60 text-lg leading-relaxed">
-            Depuis 2012, nous accompagnons les entreprises et particuliers dans leurs opérations logistiques avec rigueur, expertise et engagement.
+            Depuis 2018, nous accompagnons les entreprises et particuliers dans leurs opérations logistiques au Cameroun, au Canada et en Belgique, avec rigueur, expertise et engagement.
           </p>
         </div>
       </section>
@@ -75,9 +76,9 @@ export default function AboutPage() {
       <section className="py-10 border-y border-white/6 bg-white/2">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { value: "12+", label: "Années d'expérience" },
+            { value: "7+", label: "Années d'expérience" },
             { value: "500+", label: "Clients actifs" },
-            { value: "15", label: "Pays desservis" },
+            { value: "3", label: "Pays desservis" },
             { value: "10 000+", label: "Expéditions réussies" },
           ].map(({ value, label }) => (
             <div key={label}>
@@ -182,7 +183,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold">Notre équipe</h2>
             <p className="text-white/50 mt-3 text-sm">Des professionnels passionnés au service de votre logistique.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {TEAM.map(({ initials, name, role, color, desc }) => (
               <div key={name} className="bg-white/4 border border-white/8 rounded-2xl p-5 text-center hover:border-blue-500/30 transition group">
                 <div className={`w-14 h-14 rounded-full ${color} flex items-center justify-center text-xl font-bold mx-auto mb-3 group-hover:scale-105 transition-transform`}>
@@ -231,10 +232,12 @@ export default function AboutPage() {
             </p>
             <div className="space-y-3">
               {[
-                { icon: <MapPin size={15} />, text: "Douala, Cameroun" },
+                { icon: <MapPin size={15} />, text: "Douala, Cameroun (Ange Raphael)" },
+                { icon: <MapPin size={15} />, text: "Bafoussam, Cameroun (ancien Tchamassi Night Club)" },
+                { icon: <MapPin size={15} />, text: "Bruxelles, Belgique — 7j/7 · 24h/24" },
                 { icon: <Phone size={15} />, text: "+237 600 000 000" },
                 { icon: <Mail size={15} />, text: "contact@mipansarl.com" },
-                { icon: <Clock size={15} />, text: "Lun – Ven : 8h – 18h" },
+                { icon: <Clock size={15} />, text: "Cameroun : Lun – Sam · 8h – 18h" },
               ].map(({ icon, text }) => (
                 <div key={text} className="flex items-center gap-3 text-sm text-white/60">
                   <span className="text-blue-400">{icon}</span> {text}

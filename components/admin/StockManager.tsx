@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShoppingBag, Truck, AlertTriangle, History, Plus, Trash2, CheckCircle, Clock, XCircle } from "lucide-react";
+import { ShoppingBag, Truck, AlertTriangle, History, Plus, Trash2, CheckCircle, Clock, XCircle, TrendingUp, Wallet } from "lucide-react";
 
 type Product = { id: string; title: string; quantity: number; unit?: string | null };
-type LocalSale = { id: string; product_title: string; quantity: number; unit_price: number; total: number; note?: string | null; sold_at: string };
+type LocalSale = { id: string; product_title: string; product_id?: string | null; quantity: number; unit_price: number; total: number; note?: string | null; sold_at: string };
 type Loss = { id: string; product_title: string; quantity: number; reason?: string | null; lost_at: string };
 type ArrivalItem = { id?: string; product_id?: string | null; product_title: string; quantity: number };
 type Arrival = { id: string; label: string; expected_date: string; status: string; note?: string | null; arrival_items: ArrivalItem[] };
+type Expense = { id: string; label: string; amount: number; category?: string | null; note?: string | null; spent_at: string };
+type OrderItem = { product_id?: string; title?: string; price?: number; qty?: number };
+type Order = { id: string; total?: number; status?: string; items?: OrderItem[] };
 
 const fmt = (v: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v) + " FCFA";
+const fmtNum = (v: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v);
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 
 const TABS = [
@@ -17,6 +21,8 @@ const TABS = [
   { key: "arrivals", label: "Arrivages",        icon: Truck },
   { key: "losses",   label: "Pertes",           icon: AlertTriangle },
   { key: "history",  label: "Historique",       icon: History },
+  { key: "ranking",  label: "Classement",       icon: TrendingUp },
+  { key: "account",  label: "Compte",           icon: Wallet },
 ] as const;
 type Tab = typeof TABS[number]["key"];
 
@@ -29,6 +35,11 @@ const ARRIVAL_STATUS = {
 export default function StockManager() {
   const [tab, setTab] = useState<Tab>("sales");
   const [products, setProducts] = useState<Product[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [expForm, setExpForm] = useState({ label: "", amount: "", category: "", note: "" });
+  const [expLoading, setExpLoading] = useState(false);
+  const [expMsg, setExpMsg] = useState<string | null>(null);
 
   // Sales state
   const [sales, setSales] = useState<LocalSale[]>([]);
@@ -51,12 +62,14 @@ export default function StockManager() {
 
   useEffect(() => {
     fetch("/api/admin/products").then(r => r.json()).then(j => setProducts(j.products ?? []));
-    loadSales(); loadArrivals(); loadLosses();
+    fetch("/api/admin/orders?limit=500").then(r => r.json()).then(j => setOrders(j.orders ?? []));
+    loadSales(); loadArrivals(); loadLosses(); loadExpenses();
   }, []);
 
   const loadSales    = () => fetch("/api/admin/local-sales").then(r => r.json()).then(j => setSales(j.sales ?? []));
   const loadArrivals = () => fetch("/api/admin/arrivals").then(r => r.json()).then(j => setArrivals(j.arrivals ?? []));
   const loadLosses   = () => fetch("/api/admin/losses").then(r => r.json()).then(j => setLosses(j.losses ?? []));
+  const loadExpenses = () => fetch("/api/admin/expenses").then(r => r.json()).then(j => setExpenses(j.expenses ?? []));
 
   // ── Vente locale ─────────────────────────────────────────────────────────
   const handleSaleProduct = (pid: string) => {
@@ -152,6 +165,57 @@ export default function StockManager() {
     await fetch("/api/admin/losses", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     setLosses(l => l.filter(x => x.id !== id));
   };
+
+  // ── Dépenses ─────────────────────────────────────────────────────────────
+  const submitExpense = async () => {
+    if (!expForm.label || !expForm.amount) { setExpMsg("Label et montant requis."); return; }
+    setExpLoading(true); setExpMsg(null);
+    const res = await fetch("/api/admin/expenses", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...expForm, amount: Number(expForm.amount) }),
+    });
+    const json = await res.json();
+    setExpLoading(false);
+    if (json.error) { setExpMsg("Erreur : " + json.error); return; }
+    setExpForm({ label: "", amount: "", category: "", note: "" });
+    await loadExpenses();
+  };
+
+  const deleteExpense = async (id: string) => {
+    if (!confirm("Supprimer cette dépense ?")) return;
+    await fetch("/api/admin/expenses", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    setExpenses(e => e.filter(x => x.id !== id));
+  };
+
+  // ── Calculs compte ────────────────────────────────────────────────────────
+  const totalLocalSales = sales.reduce((s, x) => s + Number(x.total), 0);
+  const totalOnlineSales = orders
+    .filter(o => ["confirmed", "paid", "processing", "shipped", "delivered"].includes(o.status ?? ""))
+    .reduce((s, o) => s + Number(o.total ?? 0), 0);
+  const totalSales = totalLocalSales + totalOnlineSales;
+  const totalLosses = losses.reduce((s, x) => s + Number(x.quantity), 0);
+  const totalExpenses = expenses.reduce((s, x) => s + Number(x.amount), 0);
+  const netValue = totalSales - totalExpenses;
+
+  // ── Classement produits ────────────────────────────────────────────────────
+  const salesRanking = (() => {
+    const map = new Map<string, { title: string; qty: number; revenue: number }>();
+    // Ventes locales
+    for (const s of sales) {
+      const key = s.product_id ?? s.product_title;
+      const cur = map.get(key) ?? { title: s.product_title, qty: 0, revenue: 0 };
+      map.set(key, { title: s.product_title, qty: cur.qty + s.quantity, revenue: cur.revenue + Number(s.total) });
+    }
+    // Ventes en ligne
+    for (const o of orders.filter(o => ["confirmed","paid","processing","shipped","delivered"].includes(o.status ?? ""))) {
+      for (const item of (o.items ?? [])) {
+        const key = item.product_id ?? (item.title ?? "");
+        const cur = map.get(key) ?? { title: item.title ?? "—", qty: 0, revenue: 0 };
+        map.set(key, { title: item.title ?? cur.title, qty: cur.qty + (item.qty ?? 0), revenue: cur.revenue + (Number(item.price ?? 0) * (item.qty ?? 0)) });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
+  })();
 
   // ── Render ────────────────────────────────────────────────────────────────
   const inputCls = "w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition";
@@ -420,6 +484,106 @@ export default function StockManager() {
           {sales.length === 0 && losses.length === 0 && (
             <p className="text-white/30 text-sm text-center py-6">Aucun mouvement de stock enregistré.</p>
           )}
+        </div>
+      )}
+
+      {/* ── CLASSEMENT ── */}
+      {tab === "ranking" && (
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-white/60">Classement des produits les plus vendus</h4>
+          {salesRanking.length === 0 ? (
+            <p className="text-white/30 text-sm text-center py-6">Aucune vente enregistrée.</p>
+          ) : salesRanking.map((p, i) => (
+            <div key={i} className="flex items-center gap-3 bg-white/3 border border-white/6 rounded-lg px-4 py-3">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                i === 0 ? "bg-yellow-500/30 text-yellow-300" :
+                i === 1 ? "bg-white/20 text-white/70" :
+                i === 2 ? "bg-amber-700/30 text-amber-400" :
+                "bg-white/5 text-white/30"
+              }`}>{i + 1}</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-white truncate">{p.title}</div>
+                <div className="text-xs text-white/40">{fmtNum(p.qty)} unités vendues</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-semibold text-cyan-300">{fmt(p.revenue)}</div>
+                <div className="text-xs text-white/30">chiffre d'affaires</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── COMPTE ── */}
+      {tab === "account" && (
+        <div className="space-y-5">
+          {/* Cartes résumé */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Ventes totales", value: fmt(totalSales), sub: `Local: ${fmt(totalLocalSales)} · En ligne: ${fmt(totalOnlineSales)}`, color: "text-cyan-300", bg: "bg-cyan-500/10 border-cyan-500/20" },
+              { label: "Dépenses", value: fmt(totalExpenses), sub: `${expenses.length} dépense${expenses.length > 1 ? "s" : ""}`, color: "text-orange-300", bg: "bg-orange-500/10 border-orange-500/20" },
+              { label: "Pertes (unités)", value: fmtNum(totalLosses), sub: `${losses.length} incident${losses.length > 1 ? "s" : ""}`, color: "text-red-300", bg: "bg-red-500/10 border-red-500/20" },
+              { label: "Valeur nette", value: fmt(netValue), sub: "Ventes − Dépenses", color: netValue >= 0 ? "text-green-300" : "text-red-300", bg: netValue >= 0 ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20" },
+            ].map((card, i) => (
+              <div key={i} className={`rounded-xl border p-4 ${card.bg}`}>
+                <div className="text-xs text-white/40 mb-1">{card.label}</div>
+                <div className={`text-lg font-bold ${card.color}`}>{card.value}</div>
+                <div className="text-[10px] text-white/30 mt-0.5">{card.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Dépenses */}
+          <div className="bg-white/4 border border-white/10 rounded-xl p-4 space-y-3">
+            <h3 className="font-semibold text-white flex items-center gap-2"><Wallet size={16} className="text-orange-400" /> Enregistrer une dépense</h3>
+            {expMsg && <p className="text-red-400 text-sm">{expMsg}</p>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Label *</label>
+                <input className={`w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition`}
+                  placeholder="Ex: Loyer, Transport..." value={expForm.label}
+                  onChange={e => setExpForm(f => ({ ...f, label: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Montant (FCFA) *</label>
+                <input className={`w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition`}
+                  type="number" placeholder="0" value={expForm.amount}
+                  onChange={e => setExpForm(f => ({ ...f, amount: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Catégorie</label>
+                <input className={`w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition`}
+                  placeholder="Ex: Logistique, Salaire..." value={expForm.category}
+                  onChange={e => setExpForm(f => ({ ...f, category: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Note</label>
+                <input className={`w-full px-3 py-2 rounded-lg bg-white/6 border border-white/12 text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition`}
+                  placeholder="Note optionnelle..." value={expForm.note}
+                  onChange={e => setExpForm(f => ({ ...f, note: e.target.value }))} />
+              </div>
+            </div>
+            <button onClick={submitExpense} disabled={expLoading}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition disabled:opacity-50">
+              <Plus size={14} />{expLoading ? "Enregistrement..." : "Ajouter la dépense"}
+            </button>
+          </div>
+
+          {/* Liste dépenses */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-white/60">Dépenses ({expenses.length})</h4>
+            {expenses.length === 0 ? <p className="text-white/30 text-sm text-center py-4">Aucune dépense enregistrée.</p> : expenses.map(e => (
+              <div key={e.id} className="flex items-center gap-3 bg-white/3 border border-white/6 rounded-lg px-3 py-2.5">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white">{e.label}</div>
+                  <div className="text-xs text-white/40">{fmtDate(e.spent_at)}{e.category ? ` · ${e.category}` : ""}</div>
+                  {e.note && <div className="text-xs text-white/30 italic">{e.note}</div>}
+                </div>
+                <div className="text-orange-300 font-semibold text-sm">{fmt(Number(e.amount))}</div>
+                <button onClick={() => deleteExpense(e.id)} className="p-1.5 rounded hover:bg-red-600/20 text-red-400 transition"><Trash2 size={13} /></button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

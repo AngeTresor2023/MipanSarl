@@ -45,7 +45,7 @@ export default function ExchangePage() {
     const loadRate = async () => {
       setLoadingRate(true);
       try {
-        const res = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=XOF");
+        const res = await fetch("https://open.er-api.com/v6/latest/EUR");
         const json = await res.json();
         if (!mounted) return;
         const r = Number(json?.rates?.XOF ?? null);

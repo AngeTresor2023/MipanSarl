@@ -196,6 +196,15 @@ export default function StockManager() {
   const totalLosses = losses.reduce((s, x) => s + Number(x.quantity), 0);
   const totalExpenses = expenses.reduce((s, x) => s + Number(x.amount), 0);
   const netValue = totalSales - totalExpenses;
+  // Cash en caisse = ventes locales encaissées - dépenses sorties
+  const cashInHand = totalLocalSales - totalExpenses;
+
+  // Flux de caisse chronologiques (entrées ventes locales + sorties dépenses)
+  type CashFlow = { id: string; date: string; label: string; amount: number; type: "in" | "out" };
+  const cashFlows: CashFlow[] = [
+    ...sales.map(s => ({ id: s.id, date: s.sold_at, label: `Vente — ${s.product_title}`, amount: s.total, type: "in" as const })),
+    ...expenses.map(e => ({ id: e.id, date: e.spent_at, label: `Dépense — ${e.label}`, amount: e.amount, type: "out" as const })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // ── Classement produits ────────────────────────────────────────────────────
   const salesRanking = (() => {
@@ -518,9 +527,10 @@ export default function StockManager() {
       {tab === "account" && (
         <div className="space-y-5">
           {/* Cartes résumé */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
               { label: "Ventes totales", value: fmt(totalSales), sub: `Local: ${fmt(totalLocalSales)} · En ligne: ${fmt(totalOnlineSales)}`, color: "text-cyan-300", bg: "bg-cyan-500/10 border-cyan-500/20" },
+              { label: "Cash en caisse", value: fmt(cashInHand), sub: "Ventes locales − Dépenses", color: cashInHand >= 0 ? "text-emerald-300" : "text-red-300", bg: cashInHand >= 0 ? "bg-emerald-500/10 border-emerald-500/20" : "bg-red-500/10 border-red-500/20" },
               { label: "Dépenses", value: fmt(totalExpenses), sub: `${expenses.length} dépense${expenses.length > 1 ? "s" : ""}`, color: "text-orange-300", bg: "bg-orange-500/10 border-orange-500/20" },
               { label: "Pertes (unités)", value: fmtNum(totalLosses), sub: `${losses.length} incident${losses.length > 1 ? "s" : ""}`, color: "text-red-300", bg: "bg-red-500/10 border-red-500/20" },
               { label: "Valeur nette", value: fmt(netValue), sub: "Ventes − Dépenses", color: netValue >= 0 ? "text-green-300" : "text-red-300", bg: netValue >= 0 ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20" },
@@ -531,6 +541,32 @@ export default function StockManager() {
                 <div className="text-[10px] text-white/30 mt-0.5">{card.sub}</div>
               </div>
             ))}
+          </div>
+
+          {/* Flux de caisse */}
+          <div className="bg-white/4 border border-white/10 rounded-xl p-4 space-y-2">
+            <h3 className="font-semibold text-white flex items-center gap-2 mb-3">
+              <Wallet size={16} className="text-emerald-400" /> Flux de caisse
+              <span className="ml-auto text-xs text-white/40">{cashFlows.length} opération{cashFlows.length > 1 ? "s" : ""}</span>
+            </h3>
+            {cashFlows.length === 0 ? (
+              <p className="text-white/30 text-sm text-center py-3">Aucun flux enregistré.</p>
+            ) : (
+              <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+                {cashFlows.map(f => (
+                  <div key={f.id + f.type} className="flex items-center gap-3 rounded-lg px-3 py-2 bg-white/3 border border-white/5">
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${f.type === "in" ? "bg-emerald-400" : "bg-red-400"}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-white truncate">{f.label}</div>
+                      <div className="text-[10px] text-white/35">{fmtDate(f.date)}</div>
+                    </div>
+                    <div className={`text-sm font-semibold ${f.type === "in" ? "text-emerald-300" : "text-red-300"}`}>
+                      {f.type === "in" ? "+" : "−"}{fmt(f.amount)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Dépenses */}

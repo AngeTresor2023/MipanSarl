@@ -13,6 +13,15 @@ const COOKIE_OPTS = {
   maxAge: COOKIE_MAX_AGE,
 };
 
+// Pages sous /user/* consultables sans être connecté (vitrine publique)
+const PUBLIC_USER_PATHS = ["/user/products"];
+
+function isPublicUserPath(pathname: string) {
+  return PUBLIC_USER_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -52,8 +61,11 @@ export async function updateSession(request: NextRequest) {
     // Effacer le cookie de rôle
     response.cookies.delete(COOKIE_NAME);
 
-    // Protéger /admin/* et /user/*
-    if (pathname.startsWith("/admin") || pathname.startsWith("/user")) {
+    // Protéger /admin/* et /user/* — sauf les pages vitrine publiques (ex. boutique)
+    if (
+      (pathname.startsWith("/admin") || pathname.startsWith("/user")) &&
+      !isPublicUserPath(pathname)
+    ) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);

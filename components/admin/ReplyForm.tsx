@@ -5,11 +5,30 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/input";
 import { Send, Paperclip, X } from "lucide-react";
 
-export default function ReplyForm({ onSent }: { onSent?: () => void }) {
-  const [to, setTo] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
+export type ComposeInitial = {
+  to?: string;
+  subject?: string;
+  message?: string;
+  sourceAttachmentPath?: string;
+  sourceAttachmentFilename?: string;
+};
+
+export default function ReplyForm({
+  initial,
+  onSent,
+}: {
+  initial?: ComposeInitial;
+  onSent?: () => void;
+}) {
+  const [to, setTo] = useState(initial?.to ?? "");
+  const [subject, setSubject] = useState(initial?.subject ?? "");
+  const [message, setMessage] = useState(initial?.message ?? "");
   const [file, setFile] = useState<File | null>(null);
+  const [sourceAttachment, setSourceAttachment] = useState(
+    initial?.sourceAttachmentPath
+      ? { path: initial.sourceAttachmentPath, filename: initial.sourceAttachmentFilename ?? "pièce jointe" }
+      : null
+  );
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -23,7 +42,11 @@ export default function ReplyForm({ onSent }: { onSent?: () => void }) {
       formData.append("to", to);
       formData.append("subject", subject);
       formData.append("message", message);
-      if (file) formData.append("attachment", file);
+      if (file) {
+        formData.append("attachment", file);
+      } else if (sourceAttachment) {
+        formData.append("source_attachment_path", sourceAttachment.path);
+      }
 
       const res = await fetch("/api/admin/reply", { method: "POST", body: formData });
       const json = await res.json();
@@ -39,6 +62,7 @@ export default function ReplyForm({ onSent }: { onSent?: () => void }) {
       setSubject("");
       setMessage("");
       setFile(null);
+      setSourceAttachment(null);
       onSent?.();
     } catch {
       setFeedback({ type: "error", text: "Erreur réseau lors de l'envoi." });
@@ -74,7 +98,7 @@ export default function ReplyForm({ onSent }: { onSent?: () => void }) {
         <label className="block text-sm text-white/60 mb-1">Message</label>
         <textarea
           required
-          rows={8}
+          rows={10}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           className="w-full rounded-md bg-white/5 border border-white/10 px-3 py-2 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500"
@@ -89,6 +113,14 @@ export default function ReplyForm({ onSent }: { onSent?: () => void }) {
             <Paperclip size={14} />
             <span className="flex-1 truncate">{file.name}</span>
             <button type="button" onClick={() => setFile(null)} className="text-white/40 hover:text-white">
+              <X size={14} />
+            </button>
+          </div>
+        ) : sourceAttachment ? (
+          <div className="flex items-center gap-2 text-sm text-white/80 bg-white/5 border border-white/10 rounded-md px-3 py-2">
+            <Paperclip size={14} />
+            <span className="flex-1 truncate">{sourceAttachment.filename} (transférée)</span>
+            <button type="button" onClick={() => setSourceAttachment(null)} className="text-white/40 hover:text-white">
               <X size={14} />
             </button>
           </div>

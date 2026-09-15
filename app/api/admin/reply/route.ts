@@ -5,16 +5,30 @@ import { sendAdminEmail } from "@/lib/resend";
 async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: NextResponse.json({ error: "Non authentifié" }, { status: 401 }) };
+  if (!user) return { user: null, supabase: null, error: NextResponse.json({ error: "Non authentifié" }, { status: 401 }) };
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (profile?.role !== "admin") return { error: NextResponse.json({ error: "Accès refusé" }, { status: 403 }) };
-  return { error: null };
+  if (profile?.role !== "admin") return { user: null, supabase: null, error: NextResponse.json({ error: "Accès refusé" }, { status: 403 }) };
+  return { user, supabase, error: null };
 }
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 Mo
 
+export async function GET() {
+  const { supabase, error } = await requireAdmin();
+  if (error) return error;
+
+  const { data, error: err } = await supabase!
+    .from("sent_emails")
+    .select("id, to_email, subject, attachment_filename, status, error, created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (err) return NextResponse.json({ error: err.message }, { status: 500 });
+  return NextResponse.json({ emails: data ?? [] });
+}
+
 export async function POST(req: Request) {
-  const { error } = await requireAdmin();
+  const { user, supabase, error } = await requireAdmin();
   if (error) return error;
 
   const formData = await req.formData();
@@ -38,6 +52,17 @@ export async function POST(req: Request) {
   }
 
   const result = await sendAdminEmail({ to, subject, text: message, attachment });
+
+  await supabase!.from("sent_emails").insert({
+    sent_by: user!.id,
+    to_email: to,
+    subject,
+    message,
+    attachment_filename: attachment?.filename ?? null,
+    status: result.ok ? "sent" : "failed",
+    error: result.ok ? null : (result.error ?? "Erreur inconnue"),
+  });
+
   if (!result.ok) {
     return NextResponse.json({ error: result.error ?? "Échec de l'envoi" }, { status: 500 });
   }

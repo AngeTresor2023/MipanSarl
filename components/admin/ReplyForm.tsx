@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/input";
 import { Send, Paperclip, X } from "lucide-react";
 
-export default function ReplyForm() {
+export default function ReplyForm({ onSent }: { onSent?: () => void }) {
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -30,6 +30,7 @@ export default function ReplyForm() {
 
       if (!res.ok) {
         setFeedback({ type: "error", text: json.error ?? "Échec de l'envoi" });
+        onSent?.();
         return;
       }
 
@@ -38,6 +39,7 @@ export default function ReplyForm() {
       setSubject("");
       setMessage("");
       setFile(null);
+      onSent?.();
     } catch {
       setFeedback({ type: "error", text: "Erreur réseau lors de l'envoi." });
     } finally {

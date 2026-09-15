@@ -1,6 +1,6 @@
 import AdminShell from "@/components/admin/AdminShell";
 import AdminHeader from "@/components/admin/AdminHeader";
-import ReplyForm from "@/components/admin/ReplyForm";
+import ReplyPanel from "@/components/admin/ReplyPanel";
 
 export default function AdminReplyPage() {
   return (
@@ -10,7 +10,7 @@ export default function AdminReplyPage() {
           title="Répondre à un client"
           subtitle="Envoyer un email depuis contact@mipansarl.com"
         />
-        <ReplyForm />
+        <ReplyPanel />
       </div>
     </AdminShell>
   );

@@ -1,8 +1,8 @@
 const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL ?? "MIPAN SARL <contact@mipansarl.com>";
-const LOGO_URL = "https://mipansarl.com/icon.png";
 const SITE_URL = "https://mipansarl.com";
 
 function renderHtml({ subject, message }: { subject: string; message: string }) {
+  const safeSubject = subject.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const safeMessage = message
     .split("\n")
     .map((line) => line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"))
@@ -10,31 +10,45 @@ function renderHtml({ subject, message }: { subject: string; message: string }) 
 
   return `<!DOCTYPE html>
 <html lang="fr">
-<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,Helvetica,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:32px 16px;">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  @media only screen and (max-width: 480px) {
+    .wrap { padding: 28px 20px !important; }
+    .wordmark { font-size: 18px !important; }
+    .subject { font-size: 17px !important; }
+    .body-text { font-size: 15px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#ffffff;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;">
+      <td align="center" class="wrap" style="padding:48px 24px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
           <tr>
-            <td style="background-color:#0a0a0a;padding:24px 32px;text-align:center;">
-              <img src="${LOGO_URL}" alt="MIPAN SARL" width="56" height="56" style="border-radius:8px;display:inline-block;" />
+            <td align="center" style="padding-bottom:32px;">
+              <span class="wordmark" style="font-family:Georgia,'Times New Roman',serif;font-size:21px;letter-spacing:0.14em;color:#142139;">MIPAN&nbsp;SARL</span>
+              <div style="margin:14px auto 0;width:36px;height:2px;background-color:#B8862E;line-height:0;font-size:0;">&nbsp;</div>
             </td>
           </tr>
           <tr>
-            <td style="padding:32px;">
-              <h1 style="margin:0 0 16px;font-size:18px;color:#111111;">${subject}</h1>
-              <p style="margin:0;font-size:15px;line-height:1.6;color:#333333;">${safeMessage}</p>
+            <td>
+              <h1 class="subject" style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:19px;color:#142139;">${safeSubject}</h1>
+              <p class="body-text" style="margin:0;font-family:-apple-system,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.65;color:#33373d;">${safeMessage}</p>
             </td>
           </tr>
           <tr>
-            <td style="background-color:#fafafa;padding:20px 32px;border-top:1px solid #eeeeee;">
-              <p style="margin:0 0 4px;font-size:13px;color:#666666;font-weight:bold;">MIPAN SARL</p>
-              <p style="margin:0 0 4px;font-size:12px;color:#999999;">Transit de colis et marchandises entre l'Europe et l'Afrique</p>
-              <p style="margin:0;font-size:12px;color:#999999;">
-                <a href="mailto:contact@mipansarl.com" style="color:#999999;text-decoration:underline;">contact@mipansarl.com</a>
-                &nbsp;·&nbsp;
-                <a href="${SITE_URL}" style="color:#999999;text-decoration:underline;">${SITE_URL.replace("https://", "")}</a>
-              </p>
+            <td style="padding-top:40px;">
+              <div style="border-top:1px solid #eceae5;padding-top:20px;font-family:-apple-system,'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                <p style="margin:0 0 4px;font-size:13px;color:#7a7f87;">MIPAN SARL — Transit de colis et marchandises entre l'Europe et l'Afrique</p>
+                <p style="margin:0;font-size:13px;color:#7a7f87;">
+                  <a href="mailto:contact@mipansarl.com" style="color:#7a7f87;">contact@mipansarl.com</a>
+                  &nbsp;·&nbsp;
+                  <a href="${SITE_URL}" style="color:#7a7f87;">${SITE_URL.replace("https://", "")}</a>
+                </p>
+              </div>
             </td>
           </tr>
         </table>

@@ -47,10 +47,8 @@ export default function SentEmailsList({
   const fmt = (iso: string) =>
     new Date(iso).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
 
-  const openAttachment = async (path: string) => {
-    const res = await fetch(`/api/admin/reply/attachment-url?path=${encodeURIComponent(path)}`);
-    const json = await res.json();
-    if (json.url) window.open(json.url, "_blank");
+  const openAttachment = (path: string) => {
+    window.open(`/api/admin/reply/attachment?path=${encodeURIComponent(path)}`, "_blank");
   };
 
   const quote = (e: SentEmail) =>

@@ -4,7 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, Grid, Package, ShoppingCart, Users, FileText, Wrench, ArrowLeftRight, BarChart2 } from "lucide-react";
+import { LogOut, Grid, Package, ShoppingCart, Users, FileText, Wrench, ArrowLeftRight, BarChart2, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
@@ -16,6 +16,7 @@ const navLinks = [
   { href: "/admin/requests",  label: "Devis",          icon: FileText },
   { href: "/admin/services",  label: "Services",       icon: Wrench },
   { href: "/admin/exchanges", label: "Échanges",       icon: ArrowLeftRight },
+  { href: "/admin/repondre",  label: "Répondre",       icon: Mail },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

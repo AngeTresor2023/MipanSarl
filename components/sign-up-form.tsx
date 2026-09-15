@@ -44,27 +44,25 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/protected`,
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            address,
+            phone,
+          },
         },
       });
 
       if (error) throw error;
 
-      if (data.user) {
-  await supabase.from("profiles").upsert({
-    id: data.user.id,
-    first_name: firstName,
-    last_name: lastName,
-    address,
-    phone,
-    role: "user",
-  });
-}
-
+      // Le profil (first_name/last_name/phone/address) est enregistré côté
+      // serveur dans app/auth/confirm/route.ts une fois l'email confirmé —
+      // avant confirmation, aucune session active n'existe pour écrire en base.
 
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {

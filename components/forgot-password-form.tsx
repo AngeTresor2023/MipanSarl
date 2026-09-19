@@ -1,20 +1,17 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import Button from "@/components/ui/Button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
-import { authDict, LangToggle, translateAuthError, useAuthLang } from "@/lib/auth-i18n";
+import { AuthSplitLayout } from "@/components/auth-split-layout";
+import {
+  authDict,
+  translateAuthError,
+  useAuthLang,
+} from "@/lib/auth-i18n";
 
 export function ForgotPasswordForm({
   className,
@@ -26,6 +23,7 @@ export function ForgotPasswordForm({
   const [isLoading, setIsLoading] = useState(false);
   const [lang, setLang] = useAuthLang();
   const t = authDict[lang].forgot;
+  const panel = authDict[lang].panel;
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,58 +46,87 @@ export function ForgotPasswordForm({
     }
   };
 
+  const inputClass =
+    "h-11 border-white/10 bg-white/[0.03] text-white placeholder:text-white/30 focus-visible:border-cyan-400/60 focus-visible:ring-cyan-400/20";
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      {success ? (
-        <Card>
-          <CardHeader>
-            <LangToggle lang={lang} setLang={setLang} />
-            <CardTitle className="text-2xl">{t.successTitle}</CardTitle>
-            <CardDescription>{t.successSubtitle}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{t.successBody}</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <LangToggle lang={lang} setLang={setLang} />
-            <CardTitle className="text-2xl">{t.title}</CardTitle>
-            <CardDescription>{t.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleForgotPassword}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">{t.email}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t.submitting : t.submit}
-                </Button>
+    <AuthSplitLayout
+      headline={panel.forgot.headline}
+      subtext={panel.forgot.subtext}
+      badge={panel.badge}
+      lang={lang}
+      setLang={setLang}
+    >
+      <div className={className} {...props}>
+        {success ? (
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-white">
+              {t.successTitle}
+            </h1>
+            <p className="mt-2 text-sm text-cyan-300/90">{t.successSubtitle}</p>
+            <p className="mt-6 text-sm leading-relaxed text-white/70">
+              {t.successBody}
+            </p>
+            <p className="mt-8 text-sm text-white/60">
+              {t.haveAccount}{" "}
+              <Link
+                href="/auth/login"
+                className="font-medium text-cyan-300 underline-offset-4 hover:text-cyan-200 hover:underline"
+              >
+                {t.login}
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-white">
+              {t.title}
+            </h1>
+            <p className="mt-2 text-sm text-white/60">{t.description}</p>
+
+            <form onSubmit={handleForgotPassword} className="mt-8 space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white/80">
+                  {t.email}
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                />
               </div>
-              <div className="mt-4 text-center text-sm">
+
+              {error && (
+                <p className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                  {error}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-11 w-full bg-gradient-to-r from-amber-400 to-amber-500 font-medium text-[#0a0f1c] transition hover:from-amber-300 hover:to-amber-400 disabled:opacity-60"
+              >
+                {isLoading ? t.submitting : t.submit}
+              </Button>
+
+              <p className="pt-2 text-left text-sm text-white/60">
                 {t.haveAccount}{" "}
                 <Link
                   href="/auth/login"
-                  className="underline underline-offset-4"
+                  className="font-medium text-cyan-300 underline-offset-4 hover:text-cyan-200 hover:underline"
                 >
                   {t.login}
                 </Link>
-              </div>
+              </p>
             </form>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </div>
+        )}
+      </div>
+    </AuthSplitLayout>
   );
 }

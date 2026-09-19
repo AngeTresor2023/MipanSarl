@@ -44,21 +44,29 @@ export function LangToggle({
   setLang: (lang: AuthLang) => void;
 }) {
   return (
-    <div className="flex justify-end gap-1.5 text-xs mb-1">
+    <div className="flex items-center gap-1 text-xs uppercase tracking-wider">
       <button
         type="button"
         onClick={() => setLang("fr")}
         aria-current={lang === "fr"}
-        className={lang === "fr" ? "font-semibold underline" : "text-muted-foreground hover:underline"}
+        className={
+          lang === "fr"
+            ? "font-semibold text-white"
+            : "text-white/50 transition-colors hover:text-white/90"
+        }
       >
         FR
       </button>
-      <span className="text-muted-foreground">/</span>
+      <span className="text-white/30">/</span>
       <button
         type="button"
         onClick={() => setLang("en")}
         aria-current={lang === "en"}
-        className={lang === "en" ? "font-semibold underline" : "text-muted-foreground hover:underline"}
+        className={
+          lang === "en"
+            ? "font-semibold text-white"
+            : "text-white/50 transition-colors hover:text-white/90"
+        }
       >
         EN
       </button>
@@ -68,6 +76,24 @@ export function LangToggle({
 
 export const authDict = {
   fr: {
+    panel: {
+      badge: "Douala, Cameroun — Logistique & Commerce",
+      login: {
+        headline: "Suivez vos expéditions où que vous soyez.",
+        subtext:
+          "Accédez à vos dossiers import-export Cameroun–Canada, du chargement à la livraison.",
+      },
+      signUp: {
+        headline: "Rejoignez les entreprises qui exportent avec nous.",
+        subtext:
+          "Ouvrez votre compte mipan Sarl et pilotez vos flux logistiques en toute sérénité.",
+      },
+      forgot: {
+        headline: "Récupérez l'accès à votre espace, en quelques secondes.",
+        subtext:
+          "Nous vous envoyons un lien sécurisé pour définir un nouveau mot de passe.",
+      },
+    },
     login: {
       title: "Connexion",
       description: "Entrez votre email pour accéder à votre compte",
@@ -111,6 +137,24 @@ export const authDict = {
     genericError: "Une erreur est survenue",
   },
   en: {
+    panel: {
+      badge: "Douala, Cameroon — Logistics & Trade",
+      login: {
+        headline: "Track your shipments from anywhere.",
+        subtext:
+          "Access your Cameroon–Canada import-export files, from loading to final delivery.",
+      },
+      signUp: {
+        headline: "Join the businesses that export with us.",
+        subtext:
+          "Open your mipan Sarl account and steer your logistics flows with confidence.",
+      },
+      forgot: {
+        headline: "Regain access to your space in seconds.",
+        subtext:
+          "We'll send you a secure link to set a new password.",
+      },
+    },
     login: {
       title: "Login",
       description: "Enter your email below to login to your account",

@@ -45,6 +45,11 @@ export default function Navbar({ isAdmin, hasUser }: Props) {
   const close = () => setOpen(false);
   const links = isAdmin ? adminLinks : userLinks;
 
+  // Les pages /auth/* (login, sign-up, forgot-password...) ont leur propre
+  // écran plein cadre avec logo et marque intégrés (voir AuthSplitLayout) —
+  // la barre de nav globale ferait doublon et casserait la mise en page.
+  if (pathname.startsWith("/auth/")) return null;
+
   return (
     <nav className="w-full sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/8">
       {/* subtle blue glow top edge */}

@@ -4,7 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, Grid, Package, ShoppingCart, Users, FileText, Wrench, ArrowLeftRight, BarChart2, Mail } from "lucide-react";
+import { LogOut, Grid, Package, ShoppingCart, Users, FileText, Wrench, ArrowLeftRight, BarChart2, Mail, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
@@ -42,8 +42,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               <div className="text-[11px] text-white/40">Administration</div>
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/" className="text-xs text-white/40 hover:text-white/70 px-2 py-1 rounded bg-white/5">
-                ← Site
+              <Link href="/" className="inline-flex items-center gap-1 text-xs text-white/40 hover:text-white/70 px-2 py-1 rounded bg-white/5">
+                <ArrowLeft size={12} />
+                Site
               </Link>
               <button
                 onClick={signOut}
@@ -106,8 +107,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </nav>
 
               <div className="mt-6 border-t border-white/6 pt-4">
-                <Link href="/" className="block text-xs text-white/40 hover:text-white/70 mb-3 text-center">
-                  ← Retour au site
+                <Link href="/" className="flex items-center justify-center gap-1 text-xs text-white/40 hover:text-white/70 mb-3">
+                  <ArrowLeft size={12} />
+                  Retour au site
                 </Link>
                 <button
                   onClick={signOut}

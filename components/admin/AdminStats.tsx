@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Users, Package, FileText, Wrench, ArrowLeftRight, Wallet, ArrowRight } from "lucide-react";
 
 type Stats = {
   users: number;
@@ -34,11 +35,11 @@ export default function AdminStats() {
   }, []);
 
   const countCards = [
-    { label: "Utilisateurs",       value: stats.users,     icon: "👥", color: "text-blue-300" },
-    { label: "Produits",            value: stats.products,  icon: "📦", color: "text-purple-300" },
-    { label: "Devis en attente",    value: stats.quotes,    icon: "📝", color: "text-amber-300" },
-    { label: "Services",            value: stats.services,  icon: "🧰", color: "text-green-300" },
-    { label: "Échanges en attente", value: stats.exchanges, icon: "💱", color: "text-cyan-300" },
+    { label: "Utilisateurs",       value: stats.users,     Icon: Users,           color: "text-blue-300" },
+    { label: "Produits",            value: stats.products,  Icon: Package,         color: "text-purple-300" },
+    { label: "Devis en attente",    value: stats.quotes,    Icon: FileText,        color: "text-amber-300" },
+    { label: "Services",            value: stats.services,  Icon: Wrench,          color: "text-green-300" },
+    { label: "Échanges en attente", value: stats.exchanges, Icon: ArrowLeftRight,  color: "text-cyan-300" },
   ];
 
   const financeCards = [
@@ -55,7 +56,7 @@ export default function AdminStats() {
         {countCards.map((c) => (
           <div key={c.label} className="p-4 bg-white/4 rounded-lg border border-white/6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-3xl">{c.icon}</span>
+              <c.Icon size={24} className={c.color} />
               <span className={`text-2xl font-bold ${c.color}`}>{loading ? "…" : c.value}</span>
             </div>
             <div className="text-xs text-white/60">{c.label}</div>
@@ -66,8 +67,14 @@ export default function AdminStats() {
       {/* Finances */}
       <div className="bg-white/3 border border-white/6 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wide">💰 Finances</h2>
-          <Link href="/admin/stock" className="text-xs text-cyan-400 hover:text-cyan-300 transition">Gérer →</Link>
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-white/70 uppercase tracking-wide">
+            <Wallet size={14} className="text-white/50" />
+            Finances
+          </h2>
+          <Link href="/admin/stock" className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition">
+            Gérer
+            <ArrowRight size={12} />
+          </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {financeCards.map((c) => (

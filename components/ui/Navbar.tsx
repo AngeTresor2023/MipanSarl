@@ -9,21 +9,22 @@ import UserMenu from "./UserMenu";
 import {
   ShoppingCart, Globe, LayoutDashboard, Package,
   ClipboardList, Users, FileText, Home, Wrench, ArrowLeftRight,
+  Store, Truck, Tag, Info, Mail, X, Menu,
 } from "lucide-react";
 
 const userLinks = [
-  { href: "/user/dashboard", label: "Mon espace",    icon: <Home size={13} />,           exact: true },
-  { href: "/user/products",  label: "Boutique",                                           exact: false },
-  { href: "/user/services",  label: "Nos services",                                       exact: false },
-  { href: "/user/pricing",   label: "Nos tarifs",                                         exact: false },
-  { href: "/about",          label: "À propos",                                           exact: true },
-  { href: "/user/contact",   label: "Nous contacter",                                     exact: false },
-  { href: "/user/exchange",  label: "Exchange",      icon: <Globe size={13} />,           exact: false },
+  { href: "/user/dashboard", label: "Mon espace",      icon: <Home size={13} />,           exact: true },
+  { href: "/user/products",  label: "Boutique",        icon: <Store size={13} />,          exact: false },
+  { href: "/user/services",  label: "Nos services",    icon: <Truck size={13} />,          exact: false },
+  { href: "/user/pricing",   label: "Nos tarifs",      icon: <Tag size={13} />,            exact: false },
+  { href: "/about",          label: "À propos",        icon: <Info size={13} />,           exact: true },
+  { href: "/user/contact",   label: "Nous contacter",  icon: <Mail size={13} />,           exact: false },
+  { href: "/user/exchange",  label: "Exchange",        icon: <Globe size={13} />,          exact: false },
 ];
 
 const publicLinks = [
-  { href: "/",      label: "Accueil", exact: true },
-  { href: "/about", label: "À propos", exact: true },
+  { href: "/",      label: "Accueil",   icon: <Home size={13} />, exact: true },
+  { href: "/about", label: "À propos",  icon: <Info size={13} />, exact: true },
 ];
 
 const adminLinks = [
@@ -89,18 +90,19 @@ export default function Navbar({ isAdmin, hasUser }: Props) {
         {/* Liens publics (non connecté) */}
         {!hasUser && (
           <div className="hidden md:flex flex-1 items-center justify-center gap-0.5">
-            {publicLinks.map(({ href, label }) => {
+            {publicLinks.map(({ href, label, icon }) => {
               const active = pathname === href;
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
                     active
                       ? "text-white bg-blue-600/20 border border-blue-500/25"
                       : "text-white/60 hover:text-white hover:bg-white/6"
                   }`}
                 >
+                  <span className={active ? "text-blue-400" : "opacity-50"}>{icon}</span>
                   {label}
                 </Link>
               );
@@ -130,15 +132,7 @@ export default function Navbar({ isAdmin, hasUser }: Props) {
               aria-label="Ouvrir le menu"
               aria-expanded={open}
             >
-              {open ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M6 6l12 12M6 18L18 6" />
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
+              {open ? <X size={20} /> : <Menu size={20} />}
             </button>
           )}
         </div>

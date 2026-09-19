@@ -144,32 +144,27 @@ export default function ExchangePage() {
     setSubmitting(true);
     setError(null);
     try {
-      const { data } = await supabase.auth.getUser();
-      const user = data?.user ?? null;
+      // Sécurité : on n'envoie que les champs non-financiers. Le taux et le
+      // montant converti sont recalculés côté serveur dans /api/exchange —
+      // ce qu'on affichait ici (effectiveRate/converted) n'était qu'une
+      // estimation pour l'écran de vérification, jamais la valeur qui compte.
+      const res = await fetch("/api/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: Number(draft.amount),
+          from_currency: draft.from_currency,
+          to_currency: draft.to_currency,
+          contact_method: draft.contact_method,
+          contact_value: draft.contact_value,
+          payment_method: draft.payment_method,
+          rib: draft.payment_method === "rib" ? draft.rib ?? null : null,
+        }),
+      });
 
-      const converted = direction === "EUR_TO_XOF"
-        ? Number(draft.amount) * (effectiveRate ?? 0)
-        : Number(draft.amount) / (effectiveRate ?? 1);
-
-      const payload: any = {
-        user_id: user?.id ?? null,
-        amount: Number(draft.amount),
-        from_currency: draft.from_currency,
-        to_currency: draft.to_currency,
-        rate_public: ratePublic ?? null,
-        rate_effective: effectiveRate ?? null,
-        converted_amount: converted ?? null,
-        contact_method: draft.contact_method,
-        contact_value: draft.contact_value,
-        payment_method: draft.payment_method,
-        rib: draft.payment_method === "rib" ? draft.rib ?? null : null,
-        status: "new",
-      };
-
-      const { error: insertErr } = await supabase.from("exchanges").insert([payload]);
-      if (insertErr) {
-        console.error("Insert exchange error", insertErr);
-        setError("Impossible d'enregistrer la demande. Réessaie plus tard.");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setError(err.error ?? "Impossible d'enregistrer la demande. Réessaie plus tard.");
         setSubmitting(false);
         return;
       }

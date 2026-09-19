@@ -13,9 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import SocialAuthButtons from "./social-auth-buttons";
+import { authDict, LangToggle, translateAuthError, useAuthLang } from "@/lib/auth-i18n";
 
 export function LoginForm({
   className,
@@ -25,7 +24,8 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [lang, setLang] = useAuthLang();
+  const t = authDict[lang].login;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +42,8 @@ export function LoginForm({
       // Navigation complète pour que le middleware pose le cookie mipan_role avant le rendu du layout
       window.location.href = "/";
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      const msg = error instanceof Error ? error.message : authDict[lang].genericError;
+      setError(translateAuthError(msg, lang));
     } finally {
       setIsLoading(false);
     }
@@ -52,17 +53,15 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+          <LangToggle lang={lang} setLang={setLang} />
+          <CardTitle className="text-2xl">{t.title}</CardTitle>
+          <CardDescription>{t.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <SocialAuthButtons />
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.email}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -74,12 +73,12 @@ export function LoginForm({
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t.password}</Label>
                   <Link
                     href="/auth/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    {t.forgot}
                   </Link>
                 </div>
                 <Input
@@ -92,16 +91,16 @@ export function LoginForm({
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? t.submitting : t.submit}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              {t.noAccount}{" "}
               <Link
                 href="/auth/sign-up"
                 className="underline underline-offset-4"
               >
-                Sign up
+                {t.signUp}
               </Link>
             </div>
           </form>

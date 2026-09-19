@@ -32,7 +32,7 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
 
 /* ── Carte service ───────────────────────────────────────────────── */
 const SERVICES = [
-  { icon: <Shield size={22} />, label: "Customs Brokerage", desc: "Dédouanement complet import/export. Documents, classification tarifaire et conformité réglementaire.", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+  { icon: <Shield size={22} />, label: "Courtage en douane", desc: "Dédouanement complet import/export. Documents, classification tarifaire et conformité réglementaire.", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
   { icon: <Package size={22} />, label: "Messagerie", desc: "Livraison porte-à-porte rapide et fiable. Suivi en temps réel pour colis et documents urgents.", color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20" },
   { icon: <Truck size={22} />, label: "Fret LTL", desc: "Transport en groupage économique. Petits volumes consolidés livrés partout en Afrique.", color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
   { icon: <Globe size={22} />, label: "Livraison Express", desc: "Livraison 24 h sur les commandes locales pour vos besoins les plus urgents.", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },

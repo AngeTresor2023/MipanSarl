@@ -60,18 +60,19 @@ export default function QuotePage() {
         if (!user) return;
         setUserId(user.id);
 
-        // suppose que tu as une table "profiles" avec email et phone
+        // "profiles" n'a pas de colonne email (elle vit dans auth.users) —
+        // seul "phone" vient de la table, l'email vient de la session auth.
         const { data: profile } = await supabase
           .from("profiles")
-          .select("email, phone")
+          .select("phone")
           .eq("id", user.id)
           .maybeSingle();
 
-        if (mounted && profile) {
+        if (mounted) {
           setDraft((d) => ({
             ...d,
-            contact_method: profile.phone ? "whatsapp" : "email",
-            contact_value: profile.phone ?? profile.email ?? null,
+            contact_method: profile?.phone ? "whatsapp" : "email",
+            contact_value: profile?.phone ?? user.email ?? null,
           }));
         }
       } catch (e) {

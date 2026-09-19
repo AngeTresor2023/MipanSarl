@@ -27,7 +27,7 @@ const TEAM = [
 ];
 
 const SERVICES_DETAIL = [
-  { icon: <Shield size={20} />, title: "Customs Brokerage", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20",
+  { icon: <Shield size={20} />, title: "Courtage en douane", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20",
     points: ["Classification tarifaire précise", "Gestion complète des documents douaniers", "Conformité réglementaire garantie", "Interlocuteur dédié auprès des douanes"] },
   { icon: <Package size={20} />, title: "Messagerie Express", color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20",
     points: ["Collecte porte-à-porte", "Suivi GPS en temps réel", "Livraison sous 24 h (local)", "Preuve de livraison digitale"] },

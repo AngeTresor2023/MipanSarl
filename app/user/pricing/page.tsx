@@ -94,7 +94,7 @@ export default function PricingPage() {
   const handleAdd = async () => {
     const name = window.prompt("Nom du produit (ex: Baril 20L, Voiture) :");
     if (!name) return;
-    const priceStr = window.prompt("Prix en EUR (ex: 12.50) :");
+    const priceStr = window.prompt("Prix en FCFA (ex: 15000) :");
     if (!priceStr) return;
     const price = Number(priceStr.replace(",", "."));
     if (Number.isNaN(price)) return alert("Prix invalide.");
@@ -120,7 +120,7 @@ export default function PricingPage() {
   const handleEdit = async (row: PriceRow) => {
     const name = window.prompt("Nom", row.name);
     if (!name) return;
-    const priceStr = window.prompt("Prix en EUR", String(row.price));
+    const priceStr = window.prompt("Prix en FCFA", String(row.price));
     if (!priceStr) return;
     const price = Number(priceStr.replace(",", "."));
     if (Number.isNaN(price)) return alert("Prix invalide.");

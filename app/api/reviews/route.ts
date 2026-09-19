@@ -18,7 +18,11 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   const { name, rating, comment } = await req.json();
-  if (!rating || !comment?.trim()) return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
+  const numRating = Number(rating);
+  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+    return NextResponse.json({ error: "La note doit être un entier entre 1 et 5" }, { status: 400 });
+  }
+  if (!comment?.trim()) return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
 
   // Un seul avis par utilisateur — upsert sur user_id
   const { data: existing } = await supabase
@@ -30,7 +34,7 @@ export async function POST(req: Request) {
   if (existing) {
     const { error } = await supabase
       .from("reviews")
-      .update({ name, rating, comment, created_at: new Date().toISOString() })
+      .update({ name, rating: numRating, comment, created_at: new Date().toISOString() })
       .eq("id", existing.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true, updated: true });
@@ -38,7 +42,7 @@ export async function POST(req: Request) {
 
   const { error } = await supabase
     .from("reviews")
-    .insert([{ user_id: user.id, name, rating, comment }]);
+    .insert([{ user_id: user.id, name, rating: numRating, comment }]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, updated: false });
 }

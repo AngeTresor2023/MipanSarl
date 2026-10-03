@@ -1,5 +1,6 @@
 // components/ui/Logo.tsx
 import React from "react";
+import Image from "next/image";
 
 type LogoProps = {
   color?: string;
@@ -8,42 +9,25 @@ type LogoProps = {
 };
 
 export default function Logo({ color = "text-white", size = 20, className = "" }: LogoProps) {
+  // L'emblème est plus détaillé que l'ancien pictogramme : on l'affiche un
+  // peu plus grand que le texte pour que le navire et le M restent lisibles.
+  const emblem = Math.round(size * 1.9);
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        className={color}
-        xmlns="http://www.w3.org/2000/svg"
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      <Image
+        src="/brand/mipan-emblem.png"
+        alt=""
+        width={emblem}
+        height={emblem}
+        priority
+        className="shrink-0"
         aria-hidden
+      />
+      <span
+        className={`font-serif font-bold tracking-wide ${color}`}
+        style={{ fontSize: size * 0.95 }}
       >
-        {/* Conteneur maritime isométrique minimaliste */}
-        <g
-          stroke="currentColor"
-          strokeWidth={1.75}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {/* Face avant du conteneur */}
-          <path d="M3.5 9.5 L12 14 L12 21 L3.5 16.5 Z" />
-          {/* Face latérale droite */}
-          <path d="M12 14 L20.5 9.5 L20.5 16.5 L12 21" />
-          {/* Toit */}
-          <path d="M3.5 9.5 L12 5 L20.5 9.5 L12 14 Z" />
-          {/* Nervures face avant */}
-          <path d="M6 11.25 L6 18.25" />
-          <path d="M8.5 12.5 L8.5 19.5" />
-          {/* Nervures face latérale */}
-          <path d="M14.5 12.5 L14.5 19.5" />
-          <path d="M17 11.25 L17 18.25" />
-        </g>
-        {/* Petit accent : pastille dorée sur le toit (point d'origine/échange) */}
-        <circle cx="12" cy="5" r="1.4" fill="currentColor" opacity="0.85" />
-      </svg>
-      <span className={`font-bold tracking-tight ${color}`} style={{ fontSize: size * 0.9 }}>
-        mipan <span className="font-normal">Sarl</span>
+        MIPAN <span className="font-semibold text-[#c9a227]">SARL</span>
       </span>
     </div>
   );

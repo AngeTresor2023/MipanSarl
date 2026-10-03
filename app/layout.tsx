@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   alternates: { canonical: defaultUrl },
   icons: {
     icon: "/icon.png",
-    apple: "/icon.png",
+    apple: "/apple-icon.png",
   },
 };
 
@@ -80,7 +80,7 @@ export default async function RootLayout({
     "name": "MIPAN SARL",
     "description": "Spécialiste du transport et de la logistique internationale depuis Douala, Cameroun. Expédition de colis, barils, véhicules et marchandises.",
     "url": defaultUrl,
-    "logo": `${defaultUrl}/og-image.png`,
+    "logo": `${defaultUrl}/brand/mipan-logo.png`,
     "image": `${defaultUrl}/og-image.png`,
     "email": "support@mipansarl.com",
     "telephone": "+237600000000",

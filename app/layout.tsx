@@ -43,13 +43,11 @@ export const metadata: Metadata = {
     title: "MIPAN SARL — Transport & Logistique Internationale",
     description:
       "Expédition de colis, barils, véhicules et marchandises depuis le Cameroun. Devis en ligne rapide.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "MIPAN SARL" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "MIPAN SARL — Transport & Logistique",
     description: "Spécialiste du transport international depuis Douala, Cameroun.",
-    images: ["/og-image.png"],
   },
   alternates: { canonical: defaultUrl },
   icons: {
@@ -81,7 +79,7 @@ export default async function RootLayout({
     "description": "Spécialiste du transport et de la logistique internationale depuis Douala, Cameroun. Expédition de colis, barils, véhicules et marchandises.",
     "url": defaultUrl,
     "logo": `${defaultUrl}/brand/mipan-logo.png`,
-    "image": `${defaultUrl}/og-image.png`,
+    "image": `${defaultUrl}/opengraph-image.png`,
     "email": "support@mipansarl.com",
     "telephone": "+237600000000",
     "address": {
